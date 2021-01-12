@@ -2,7 +2,7 @@ const initAuth = () => {
   const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
   return window.gapi.auth2.init({
     client_id: CLIENT_ID,
-    scope: "https://www.googleapis.com/auth/analytics.readonly",
+    scope: 'https://www.googleapis.com/auth/analytics.readonly',
   });
 };
 
@@ -13,27 +13,27 @@ export const checkSignedIn = () => {
         const auth = window.gapi.auth2.getAuthInstance();
         resolve(auth.isSignedIn.get());
       })
-      .catch((error) => {
+      .catch(error => {
         reject(error);
       });
   });
 };
 
-const onSuccess = (googleUser) => {
-  console.log("Logged in as: " + googleUser.getBasicProfile().getName());
+const onSuccess = googleUser => {
+  console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
 };
 
-const onFailure = (error) => {
+const onFailure = error => {
   console.error(error);
 };
 
 export const renderButton = () => {
-  window.gapi.signin2.render("signin-button", {
-    scope: "profile email",
+  window.gapi.signin2.render('signin-button', {
+    scope: 'profile email',
     width: 240,
     height: 50,
     longtitle: true,
-    theme: "dark",
+    theme: 'dark',
     onsuccess: onSuccess,
     onfailure: onFailure,
   });

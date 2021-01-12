@@ -1,22 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { addDays } from "date-fns";
-import CustomDatePicker from "./datepicker";
-import { queryReport } from "./queryReport";
-import {
-  ChartTitle,
-  ReportWrapper,
-  Subtitle,
-  DatepickerRow,
-  StyledTable,
-} from "./styles";
+import React, { useState, useEffect } from 'react';
+import { addDays } from 'date-fns';
+import CustomDatePicker from './datepicker';
+import { queryReport } from './queryReport';
+import { ChartTitle, ReportWrapper, Subtitle, DatepickerRow, StyledTable } from './styles';
 
-const PageviewsReport = (props) => {
+const PageviewsReport = props => {
   const [reportData, setReportData] = useState([]);
   const [startDate, setStartDate] = useState(addDays(new Date(), -10));
   const [endDate, setEndDate] = useState(new Date());
   const [totalPages, setTotalPages] = useState(0);
 
-  const displayResults = (response) => {
+  const displayResults = response => {
     const queryResult = response.result.reports[0].data.rows;
     setTotalPages(queryResult.length);
     const total = response.result.reports[0].data.totals[0].values[0];
@@ -26,9 +20,7 @@ const PageviewsReport = (props) => {
         let tempObj = {
           path: row.dimensions[0],
           views: row.metrics[0].values[0],
-          perc: `${parseFloat((row.metrics[0].values[0] / total) * 100).toFixed(
-            1
-          )}%`,
+          perc: `${parseFloat((row.metrics[0].values[0] / total) * 100).toFixed(1)}%`,
         };
         newReportData.push(tempObj);
       }
@@ -41,22 +33,22 @@ const PageviewsReport = (props) => {
       viewID: props.viewID,
       startDate,
       endDate,
-      metrics: "ga:pageviews",
-      dimensions: ["ga:pagePath"],
+      metrics: 'ga:pageviews',
+      dimensions: ['ga:pagePath'],
       orderBy: {
-        fieldName: "ga:pageViews",
-        order: "DESCENDING",
+        fieldName: 'ga:pageViews',
+        order: 'DESCENDING',
       },
-      filter: "ga:pagePath!@localhost/",
+      filter: 'ga:pagePath!@localhost/',
     };
     setTimeout(
       () =>
         queryReport(request)
-          .then((resp) => displayResults(resp))
-          .catch((error) => console.error(error)),
-      1000
+          .then(resp => displayResults(resp))
+          .catch(error => console.error(error)),
+      1000,
     );
-  }, [startDate, endDate]);
+  }, [startDate, endDate, props.viewID]);
 
   return (
     <ReportWrapper>
@@ -64,14 +56,14 @@ const PageviewsReport = (props) => {
       <Subtitle>{`Total pages - ${totalPages}`}</Subtitle>
       <DatepickerRow>
         <CustomDatePicker
-          placeholder={"Start date"}
+          placeholder={'Start date'}
           date={startDate}
-          handleDateChange={(date) => setStartDate(date)}
+          handleDateChange={date => setStartDate(date)}
         />
         <CustomDatePicker
-          placeholder={"End date"}
+          placeholder={'End date'}
           date={endDate}
-          handleDateChange={(date) => setEndDate(date)}
+          handleDateChange={date => setEndDate(date)}
         />
       </DatepickerRow>
       {reportData.length && (

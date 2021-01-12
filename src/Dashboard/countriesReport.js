@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Pie } from "react-chartjs-2";
-import { PieChartWrapper, colors } from "./styles";
-import { addDays } from "date-fns";
-import CustomDatePicker from "./datepicker";
-import { queryReport } from "./queryReport";
-import { ChartTitle, ReportWrapper, Subtitle, DatepickerRow } from "./styles";
-import "chartjs-plugin-datalabels";
+import React, { useState, useEffect } from 'react';
+import { Pie } from 'react-chartjs-2';
+import { PieChartWrapper, colors } from './styles';
+import { addDays } from 'date-fns';
+import CustomDatePicker from './datepicker';
+import { queryReport } from './queryReport';
+import { ChartTitle, ReportWrapper, Subtitle, DatepickerRow } from './styles';
+import 'chartjs-plugin-datalabels';
 
-const CountriesReport = (props) => {
+const CountriesReport = props => {
   const INITIAL_STATE = {
     labels: [],
     values: [],
@@ -16,10 +16,10 @@ const CountriesReport = (props) => {
   const [reportData, setReportData] = useState(INITIAL_STATE);
   const [startDate, setStartDate] = useState(addDays(new Date(), -10));
   const [endDate, setEndDate] = useState(new Date());
-  const [totalCoutries, setTotalCountries] = useState(0);
+  const [totalCountries, setTotalCountries] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const displayResults = (response) => {
+  const displayResults = response => {
     const queryResult = response.result.reports[0].data.rows;
     setTotalUsers(response.result.reports[0].data.totals[0].values[0]);
     setTotalCountries(queryResult.length);
@@ -40,6 +40,7 @@ const CountriesReport = (props) => {
       colors: bgColors,
     });
   };
+  const displayResultsref = React.useRef(displayResults);
 
   const data = {
     labels: reportData.labels,
@@ -55,19 +56,23 @@ const CountriesReport = (props) => {
     tooltips: {
       callbacks: {
         label: function (tooltipItem, data) {
-          return data.labels[tooltipItem["index"]];
+          console.log(data, 'DATA');
+          return data.labels[tooltipItem['index']];
         },
       },
     },
     plugins: {
       datalabels: {
-        color: "black",
+        color: 'black',
         font: {
           size: 20,
         },
         formatter: function (value, context) {
           const perc = parseInt((value / totalUsers) * 100);
-          return perc + "%";
+          if (perc < 8) {
+            return '';
+          }
+          return perc + '%';
         },
       },
     },
@@ -78,36 +83,37 @@ const CountriesReport = (props) => {
       viewID: props.viewID,
       startDate,
       endDate,
-      metrics: "ga:users",
-      dimensions: ["ga:country"],
+      metrics: 'ga:users',
+      dimensions: ['ga:country'],
       orderBy: {
-        fieldName: "ga:users",
-        order: "DESCENDING",
+        fieldName: 'ga:users',
+        order: 'DESCENDING',
       },
     };
     setTimeout(
       () =>
         queryReport(request)
-          .then((resp) => displayResults(resp))
-          .catch((error) => console.error(error)),
-      1000
+          .then(resp => displayResultsref.current(resp))
+          .catch(error => console.error(error)),
+      1000,
     );
-  }, [startDate, endDate]);
+  }, [startDate, endDate, props.viewID]);
 
+  console.log(reportData, 'ReportData');
   return (
     <ReportWrapper>
       <ChartTitle>Top 5 Countries by Users</ChartTitle>
-      <Subtitle>{`Total countries - ${totalCoutries}`}</Subtitle>
+      <Subtitle>{`Total countries - ${totalCountries}`}</Subtitle>
       <DatepickerRow>
         <CustomDatePicker
-          placeholder={"Start date"}
+          placeholder={'Start date'}
           date={startDate}
-          handleDateChange={(date) => setStartDate(date)}
+          handleDateChange={date => setStartDate(date)}
         />
         <CustomDatePicker
-          placeholder={"End date"}
+          placeholder={'End date'}
           date={endDate}
-          handleDateChange={(date) => setEndDate(date)}
+          handleDateChange={date => setEndDate(date)}
         />
       </DatepickerRow>
       {reportData && (

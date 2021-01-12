@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { addDays } from "date-fns";
-import { Doughnut } from "react-chartjs-2";
-import CustomDatePicker from "./datepicker";
-import { queryReport } from "./queryReport";
-import { ChartTitle, Subtitle, PieChartWrapper, colors } from "./styles";
+import React, { useState, useEffect } from 'react';
+import { addDays } from 'date-fns';
+import { Doughnut } from 'react-chartjs-2';
+import CustomDatePicker from './datepicker';
+import { queryReport } from './queryReport';
+import { ChartTitle, Subtitle, PieChartWrapper, colors } from './styles';
 
-const DevicesReport = (props) => {
+const DevicesReport = props => {
   const INITIAL_STATE = {
     labels: [],
     values: [],
@@ -16,7 +16,7 @@ const DevicesReport = (props) => {
   const [endDate, setEndDate] = useState(new Date());
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const displayResults = (response) => {
+  const displayResults = response => {
     const queryResult = response.result.reports[0].data.rows;
     const total = response.result.reports[0].data.totals[0].values[0];
     setTotalUsers(total);
@@ -35,6 +35,7 @@ const DevicesReport = (props) => {
       colors: bgColors,
     });
   };
+  const displayResultsref = React.useRef(displayResults);
 
   const data = {
     labels: reportData.labels,
@@ -47,7 +48,7 @@ const DevicesReport = (props) => {
   };
 
   const options = {
-    legend: { position: "bottom" },
+    legend: { position: 'bottom' },
     maintainAspectRatio: false,
     plugins: {
       datalabels: {
@@ -61,31 +62,31 @@ const DevicesReport = (props) => {
       viewID: props.viewID,
       startDate,
       endDate,
-      metrics: "ga:users",
-      dimensions: ["ga:deviceCategory"],
+      metrics: 'ga:users',
+      dimensions: ['ga:deviceCategory'],
     };
     setTimeout(
       () =>
         queryReport(request)
-          .then((resp) => displayResults(resp))
-          .catch((error) => console.error(error)),
-      1500
+          .then(resp => displayResultsref.current(resp))
+          .catch(error => console.error(error)),
+      1500,
     );
-  }, [startDate, endDate]);
+  }, [startDate, endDate, props.viewID]);
 
   return (
     <div>
       <ChartTitle>Devices by Users</ChartTitle>
       <Subtitle>{`Total Users - ${totalUsers}`}</Subtitle>
       <CustomDatePicker
-        placeholder={"Start date"}
+        placeholder={'Start date'}
         date={startDate}
-        handleDateChange={(date) => setStartDate(date)}
+        handleDateChange={date => setStartDate(date)}
       />
       <CustomDatePicker
-        placeholder={"End date"}
+        placeholder={'End date'}
         date={endDate}
-        handleDateChange={(date) => setEndDate(date)}
+        handleDateChange={date => setEndDate(date)}
       />
       {reportData && (
         <PieChartWrapper>

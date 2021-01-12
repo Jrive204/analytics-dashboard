@@ -1,19 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
-import { addDays, format } from "date-fns";
-import CustomDatePicker from "./datepicker";
-import { queryReport } from "./queryReport";
-import { formatDate, transformToDate } from "./utils";
-import {
-  ChartTitle,
-  ReportWrapper,
-  Subtitle,
-  DatepickerRow,
-  ChartWrapper,
-  colors,
-} from "./styles";
+import React, { useEffect, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
+import { addDays, format } from 'date-fns';
+import CustomDatePicker from './datepicker';
+import { queryReport } from './queryReport';
+import { formatDate, transformToDate } from './utils';
+import { ChartTitle, ReportWrapper, Subtitle, DatepickerRow, ChartWrapper, colors } from './styles';
 
-const SourceReport = (props) => {
+const SourceReport = props => {
   const INITIAL_STATE = {
     labels: [],
     datasets: [],
@@ -23,10 +16,10 @@ const SourceReport = (props) => {
   const [endDate, setEndDate] = useState(new Date());
   const [totalSources, setTotalSources] = useState(0);
 
-  const transformAPIData = (data) => {
+  const transformAPIData = data => {
     let transformedData = [];
     let datesArray = [];
-    data.forEach((row) => {
+    data.forEach(row => {
       transformedData.push({
         date: formatDate(row.dimensions[1]),
         source: row.dimensions[0],
@@ -37,7 +30,7 @@ const SourceReport = (props) => {
     return [transformedData, datesArray];
   };
 
-  const groupDataBySource = (data) => {
+  const groupDataBySource = data => {
     return data.reduce((r, a) => {
       r[a.source] = r[a.source] || [];
       r[a.source].push(a);
@@ -45,7 +38,7 @@ const SourceReport = (props) => {
     }, Object.create(null));
   };
 
-  const sortSourcesByTotalVisits = (data) => {
+  const sortSourcesByTotalVisits = data => {
     let sumedVisits = [];
     for (let [key, value] of Object.entries(data)) {
       const sumOfVisits = value.reduce((a, b) => {
@@ -63,9 +56,7 @@ const SourceReport = (props) => {
     datesArray.sort((a, b) => {
       return new Date(a) - new Date(b);
     });
-    const datesFormatted = datesArray.map((date) =>
-      format(new Date(date), "MMM. d, yyyy")
-    );
+    const datesFormatted = datesArray.map(date => format(new Date(date), 'MMM. d, yyyy'));
     const uniqueDates = [...new Set(datesFormatted)];
     let datasetsArray = [];
     let i = 0;
@@ -75,10 +66,8 @@ const SourceReport = (props) => {
         const backgroundColor = colors[i + 3];
         i++;
         let data = [];
-        uniqueDates.forEach((date) => {
-          const row = groupedBySource[item.source].find(
-            (item) => item.date === date
-          );
+        uniqueDates.forEach(date => {
+          const row = groupedBySource[item.source].find(item => item.date === date);
           if (row) {
             data.push(parseInt(row.visits));
           } else {
@@ -95,7 +84,7 @@ const SourceReport = (props) => {
     return { labels: uniqueDates, data: datasetsArray };
   };
 
-  const displayResults = (response) => {
+  const displayResults = response => {
     const queryResult = response.result.reports[0].data.rows;
 
     const data = transformAPIData(queryResult);
@@ -107,11 +96,7 @@ const SourceReport = (props) => {
 
     const sumedVisits = sortSourcesByTotalVisits(groupedBySource);
 
-    const dataForChart = createDataForChart(
-      datesArray,
-      sumedVisits,
-      groupedBySource
-    );
+    const dataForChart = createDataForChart(datesArray, sumedVisits, groupedBySource);
 
     setReportData({
       ...reportData,
@@ -119,12 +104,13 @@ const SourceReport = (props) => {
       datasets: dataForChart.data,
     });
   };
+  const displayResultsref = React.useRef(displayResults);
 
   const options = {
     tooltips: {
       displayColors: true,
       callbacks: {
-        mode: "x",
+        mode: 'x',
       },
     },
     scales: {
@@ -142,12 +128,12 @@ const SourceReport = (props) => {
           ticks: {
             beginAtZero: true,
           },
-          type: "linear",
+          type: 'linear',
         },
       ],
     },
     maintainAspectRatio: false,
-    legend: { position: "bottom" },
+    legend: { position: 'bottom' },
     plugins: {
       datalabels: {
         font: {
@@ -167,17 +153,17 @@ const SourceReport = (props) => {
       viewID: props.viewID,
       startDate,
       endDate,
-      metrics: "ga:users",
-      dimensions: ["ga:source", "ga:date"],
+      metrics: 'ga:users',
+      dimensions: ['ga:source', 'ga:date'],
     };
     setTimeout(
       () =>
         queryReport(request)
-          .then((resp) => displayResults(resp))
-          .catch((error) => console.error(error)),
-      1100
+          .then(resp => displayResultsref.current(resp))
+          .catch(error => console.error(error)),
+      1100,
     );
-  }, [startDate, endDate]);
+  }, [startDate, endDate, props.viewID]);
 
   return (
     <ReportWrapper>
@@ -185,14 +171,14 @@ const SourceReport = (props) => {
       <Subtitle>{`Total sources - ${totalSources}`}</Subtitle>
       <DatepickerRow>
         <CustomDatePicker
-          placeholder={"Start date"}
+          placeholder={'Start date'}
           date={startDate}
-          handleDateChange={(date) => setStartDate(date)}
+          handleDateChange={date => setStartDate(date)}
         />
         <CustomDatePicker
-          placeholder={"End date"}
+          placeholder={'End date'}
           date={endDate}
-          handleDateChange={(date) => setEndDate(date)}
+          handleDateChange={date => setEndDate(date)}
         />
       </DatepickerRow>
       {reportData && (

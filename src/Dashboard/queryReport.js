@@ -1,29 +1,21 @@
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
-export const queryReport = (props) => {
-  const {
-    viewID,
-    startDate,
-    endDate,
-    metrics,
-    dimensions,
-    orderBy,
-    filter,
-  } = props;
+export const queryReport = async props => {
+  const { viewID, startDate, endDate, metrics, dimensions, orderBy, filter } = props;
 
-  const requestDimensions = (dimensions) => {
+  const requestDimensions = dimensions => {
     let result = [];
-    dimensions.forEach((item) => {
+    dimensions.forEach(item => {
       result.push({
         name: item,
       });
     });
     return result;
   };
-  return window.gapi.client.request({
-    path: "/v4/reports:batchGet",
-    root: "https://analyticsreporting.googleapis.com/",
-    method: "POST",
+  let res = await window.gapi.client.request({
+    path: '/v4/reports:batchGet',
+    root: 'https://analyticsreporting.googleapis.com/',
+    method: 'POST',
     body: {
       reportRequests: [
         {
@@ -31,8 +23,8 @@ export const queryReport = (props) => {
           filtersExpression: filter,
           dateRanges: [
             {
-              startDate: format(new Date(startDate), "yyyy-MM-dd"),
-              endDate: format(new Date(endDate), "yyyy-MM-dd"),
+              startDate: format(new Date(startDate), 'yyyy-MM-dd'),
+              endDate: format(new Date(endDate), 'yyyy-MM-dd'),
             },
           ],
           metrics: [
@@ -53,4 +45,6 @@ export const queryReport = (props) => {
       ],
     },
   });
+  console.log(res, 'RESPONSE');
+  return res;
 };
